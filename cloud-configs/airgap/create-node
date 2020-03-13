@@ -1,10 +1,10 @@
 #!/bin/bash
 
-RANCHEROSISO="$(pwd)/rancheros.iso"
+RANCHEROSISO="$(pwd)/rancheros-vmware.iso"
 if [ ! -f $RANCHEROSISO ]; then
-	RANCHEROSISO="$(pwd)/releases/latest/rancheros.iso"
+	RANCHEROSISO="$(pwd)/releases/latest/rancheros-vmware.iso"
 	if [ ! -f $RANCHEROSISO ]; then
-		RANCHEROSISO="http://releases.rancher.com/os/latest/rancheros.iso"
+		RANCHEROSISO="http://releases.rancher.com/os/latest/rancheros-vmware.iso"
 	fi
 fi
 echo "Using $RANCHEROSISO to create machine"
@@ -26,19 +26,22 @@ echo "Creating node${NODE_ID}"
 echo "----------------------------------"
 
 docker-machine -D create --driver vmwarevsphere \
-	--vmwarevsphere-vcenter 10.10.10.41 \
-	--vmwarevsphere-username root \
-	--vmwarevsphere-password peterpan \
+	--vmwarevsphere-vcenter $2 \
+	--vmwarevsphere-username $3 \
+	--vmwarevsphere-password $4 \
 	--vmwarevsphere-boot2docker-url $RANCHEROSISO \
 	--vmwarevsphere-network airgapped \
-	--vmwarevsphere-cfgparam "guestinfo.hostname=node${NODE_ID}" \
+	--vmwarevsphere-cfgparam "guestinfo.hostname=ctdcto${NODE_ID}.lss.emc.com" \
 	--vmwarevsphere-cfgparam "guestinfo.interface.0.name=eth0" \
-	--vmwarevsphere-cfgparam "guestinfo.interface.0.ip.0.address=10.11.11.${NODE_ID}/24" \
-	--vmwarevsphere-cfgparam "guestinfo.interface.0.route.0.gateway=10.11.11.1" \
-	--vmwarevsphere-cfgparam "guestinfo.dns.server.0=10.11.11.1" \
-	--vmwarevsphere-cpu-count "4" \
+	--vmwarevsphere-cfgparam "guestinfo.interface.0.dhcp=no" \
+	--vmwarevsphere-cfgparam "guestinfo.interface.0.role=public" \
+	--vmwarevsphere-cfgparam "guestinfo.interface.0.ip.0.address=10.62.88.${NODE_ID}/24" \
+	--vmwarevsphere-cfgparam "guestinfo.interface.0.route.0.gateway=10.62.88.1" \
+	--vmwarevsphere-cfgparam "guestinfo.dns.server.0=10.254.174.10" \
+	--vmwarevsphere-cfgparam "guestinfo.dns.server.1=10.104.128.235" \
+	--vmwarevsphere-cfgparam "guestinfo.dns.domain.0=lss.emc.com" \
+	--vmwarevsphere-cpu-count "1" \
 	--vmwarevsphere-memory-size "4096" \
 	--vmwarevsphere-disk-size "40960" \
 	--vmwarevsphere-cloudinit ${CLOUD_INIT_DIR}/install-node.sh \
-	 node${NODE_ID}
-
+	 ctdcto${NODE_ID}.lss.emc.com

@@ -19,39 +19,52 @@ rancher:
   services_include:
   password: rancher
   network:
-    http_proxy: http://10.11.11.1:3128
-    https_proxy: http://10.11.11.1:3128
-    no_proxy: localhost,127.0.0.1,10.11.11.1
-    #interfaces:
+    # http_proxy: http://10.11.11.1:3128
+    # https_proxy: http://10.11.11.1:3128
+    # no_proxy: localhost,127.0.0.1,10.11.11.1
+    interfaces:
       # the airgapped private network
       # setting these here means they're not ready before the install - TODO: move them into vmware guestinfo
-      #eth0:
-      #  addresses:
-      #  - 10.11.11.100/24
-      #  gateway: 10.11.11.1
-    #dns:
-    #  nameservers:
-    #  - 10.11.11.1
+      eth0:
+        addresses:
+        - 10.62.88.52/24
+        gateway: 10.62.88.1
+    dns:
+      nameservers:
+      - 10.254.174.10
+      - 10.104.128.235
+      domain:
+      - lss.emc.com
   # these are auto-set from the rancher.network. settings
   #environment:
   #  HTTP_PROXY: http://10.11.11.1:3128
   #  HTTPS_PROXY: http://10.11.11.1:3128
   #  NO_PROXY: localhost,127.0.0.1,10.11.11.1
-  repositories:
-    roast:
-      url: http://roastlink.github.io/
+  # repositories:
+    # roast:
+      # url: http://roastlink.github.io/
   # note: these are sven's home registies
-  docker:
-    registry_mirror: "http://10.11.11.1:5000"
-    insecure_registry:
-    - 10.10.10.1:5000
-  system_docker:
-    registry_mirror: "http://10.11.11.1:5000"
-    insecure_registry:
-    - 10.10.10.23:5000
+  # docker:
+    # registry_mirror: "https://ctdcto38.lss.emc.com"
+    # insecure_registry:
+    # - ctdcto38.lss.emc.com
+  # system_docker:
+    # registry_mirror: "https://ctdcto38.lss.emc.com"
+    # insecure_registry:
+    # - ctdcto38.lss.emc.com
 ssh_authorized_keys:
-- ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC4lT2u93xi+ghKV/zmkSDLqDzGOVb0iZnmh3H6+jJuAiEJwrQ7a33nL9CYVhvlE+dvszVqJT5Q2VHexiuzguqCeaoQvn9preuIc0vvSVlxUwBRtNjKGPO5SmcDgiPKLqeLNgkKWBWaseZR/GdrXlnUD8snnatBtSh2mx1cwVJr0XdyTAtnCS5eyONzpBFpHZ7/dzzeSqjG3SAXwj/x41WDJE4bBNXlGOCJ1RYk9Z5HYH/fGt5B6V34hy/EKe9Wl4yaDdlL+JTXHWGTEhPL/+yaUM6SZT92XFq/H562t8EIAL15KX8FtOv4Q/U9ByZP8xcSir/VIKoGIfMdeRtZobSDvM0caEMUp6lI+5ErmynVExVtroSPdjVdX3q7Onuqcp6JvBFVngAcviuCZDCXuFfF9ikB1axBTGTQlCAebCBPapyBF8z6RFDROHmm5CeV3RozsHEaRqNzPBoG5Tz9Z3mmDE/i2ihLpET67dpQVI8H3/r4puNwtttHh93BmPR9ZB80iLf4Oim/y1joI7UQwc+TJg6eMBZMUWeR8dVhIXFgohiEfvuSUfs7j67V9IzzIefaRGKEv1bBnTYaOlD/KbPXOxYazZAm00wx6DvEfiKxwCOanbN0z+TMyi5WxCum7pSCUZ9+M767aPzRBipQokpBJTLuq5Tn+XAOU49AIt0a3Q==
-  SvenDowideit@home.org.au
+- ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDLFpfQiZsY7wd9SiLZ1/dTB/wcoDZqcvGur2CFKhAuzB2p+py4Sg9RDxNnmQ/jN61Fqg62yHZB1ffq5OBniM+6zP2O0c/BXwb1O4cZd5TOH7KxliuEUuICji1UTe8bNNyWsUR5NtMEoeFgi4TFnnQ0kD3yc7jWlLaMsconbiT5BRZDUK3db4t9QKh0f2TVpUDHMgdT03/OpZesmOBhMEhNArWAmbEjKICo8H9EzONHyDrG1AP6+KcPsUz50WVXEtqXW2ESvVXRhjZzt69+jY6l4anj/nOf3M/JMDmdyCNcrs35V/ayFki9RXnd+KpQeYrZ83PtJaz+bvNdtqW4wXX/ ucc@dfs
+write_files:
+- container: ntp
+  path: /etc/ntp.conf
+  permissions: "0644"
+  owner: root
+  content: |
+    server nsdrm-vip.isus.emc.com prefer
+    restrict default nomodify nopeer noquery limited kod
+    restrict 127.0.0.1
+    restrict [::1]
+    restrict localhost
 EOF
 ) > cloud-init.yml
 
