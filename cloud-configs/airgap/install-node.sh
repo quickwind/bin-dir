@@ -17,7 +17,18 @@ cat << EOF
 #cloud-init
 #hostname: ctdcto54.lss.emc.com
 rancher:
-#  network:
+  network:
+    post_cmds:
+    - iptables -F
+    - iptables -A INPUT -i lo -j ACCEPT
+    - iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    - iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+    - iptables -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+    - iptables -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
+    - iptables -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
+    - iptables -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+    - iptables -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+    - iptables -A INPUT -j REJECT --reject-with icmp-host-prohibited
 #    dns:
 #      nameservers:
 #      - 10.254.174.10
@@ -31,9 +42,18 @@ rancher:
 #        gateway: 10.62.88.1
 #        match: eth0
   resize_device: /dev/sda
+  repositories:
+  system_docker:
+    bridge: none
+    extra_args: [--iptables=false, --ip-masq=false, --ip-forward=false, --ipv6=false]
+  docker:
+    bridge: none
+    tls_args:
+    extra_args: [--iptables=false, --ip-masq=false, --ip-forward=false, --ipv6=false]
   services_include:
   upgrade:
     policy: none
+    url: 
 ssh_authorized_keys:
 - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDLFpfQiZsY7wd9SiLZ1/dTB/wcoDZqcvGur2CFKhAuzB2p+py4Sg9RDxNnmQ/jN61Fqg62yHZB1ffq5OBniM+6zP2O0c/BXwb1O4cZd5TOH7KxliuEUuICji1UTe8bNNyWsUR5NtMEoeFgi4TFnnQ0kD3yc7jWlLaMsconbiT5BRZDUK3db4t9QKh0f2TVpUDHMgdT03/OpZesmOBhMEhNArWAmbEjKICo8H9EzONHyDrG1AP6+KcPsUz50WVXEtqXW2ESvVXRhjZzt69+jY6l4anj/nOf3M/JMDmdyCNcrs35V/ayFki9RXnd+KpQeYrZ83PtJaz+bvNdtqW4wXX/ ucc@dfs
 write_files:
